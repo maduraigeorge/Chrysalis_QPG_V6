@@ -182,9 +182,10 @@ const App: React.FC = () => {
     setQuestions(prev => {
       const exists = prev.find(q => q.id === updatedQ.id);
       if (exists) {
-        return prev.map(q => q.id === updatedQ.id ? updatedQ : q);
+        // Deep update to trigger reactivity in all connected components
+        return prev.map(q => q.id === updatedQ.id ? { ...updatedQ } : q);
       }
-      return [...prev, updatedQ];
+      return [...prev, { ...updatedQ }];
     });
   };
 

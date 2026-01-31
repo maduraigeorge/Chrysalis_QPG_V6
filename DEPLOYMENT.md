@@ -25,8 +25,8 @@ sudo mysql_secure_installation
 sudo mysql -u root -p
 # Inside MySQL:
 # CREATE DATABASE chrysalis_db;
-# CREATE USER 'chrysalis_user'@'localhost' IDENTIFIED BY 'your_password';
-# GRANT ALL PRIVILEGES ON chrysalis_db.* TO 'chrysalis_user'@'localhost';
+# CREATE USER 'george'@'localhost' IDENTIFIED BY 'Reset@123';
+# GRANT ALL PRIVILEGES ON chrysalis_db.* TO 'george'@'localhost';
 # FLUSH PRIVILEGES;
 # EXIT;
 ```

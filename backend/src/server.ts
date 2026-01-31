@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,65 +11,58 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security & Middleware
-// Fix: cast middleware to any to resolve Express type mismatch errors
 app.use(helmet() as any);
-// Fix: cast middleware to any to resolve Express type mismatch errors
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://test.chrysalis.world'] 
-    : '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}) as any);
-// Fix: cast middleware to any to resolve Express type mismatch errors
+app.use(cors() as any);
 app.use(morgan('combined') as any);
-// Fix: cast middleware to any to resolve Express type mismatch errors
 app.use(express.json() as any);
 
-// Health Check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', environment: process.env.NODE_ENV });
-});
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-// Example Lessons Route (Ported from user logic)
 app.get('/api/lessons', async (req, res) => {
-  try {
-    const { subject, grade } = req.query;
-    const rows = await db.query(
-      'SELECT * FROM lessons WHERE subject = ? AND grade = ?',
-      [subject || '', grade || '']
-    );
-    res.json(rows);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
+  const { subject, grade } = req.query;
+  const rows = await db.query('SELECT * FROM lessons WHERE subject = ? AND grade = ?', [subject, grade]);
+  res.json(rows);
 });
 
-// Example Questions Route
+app.get('/api/learning-outcomes', async (req, res) => {
+  const { lessonIds } = req.query;
+  if (!lessonIds) return res.json([]);
+  const ids = (lessonIds as string).split(',');
+  const placeholders = ids.map(() => '?').join(',');
+  const rows = await db.query(`SELECT * FROM learning_outcomes WHERE lesson_id IN (${placeholders})`, ids);
+  res.json(rows);
+});
+
 app.get('/api/questions', async (req, res) => {
-  try {
-    const { subject, grade } = req.query;
-    const rows = await db.query(
-      'SELECT * FROM questions WHERE subject = ? AND grade = ?',
-      [subject || '', grade || '']
+  const { subject, grade, lessonIds } = req.query;
+  let sql = 'SELECT * FROM questions WHERE subject = ? AND grade = ?';
+  const params: any[] = [subject, grade];
+  if (lessonIds) {
+    const ids = (lessonIds as string).split(',');
+    sql += ` AND lesson_id IN (${ids.map(() => '?').join(',')})`;
+    params.push(...ids);
+  }
+  const rows = await db.query(sql, params);
+  res.json(rows);
+});
+
+app.post('/api/questions', async (req, res) => {
+  const q = req.body;
+  if (q.id) {
+    // Update existing
+    await db.execute(
+      'UPDATE questions SET question_text = ?, answer_key = ?, marks = ?, difficulty = ?, image_url = ? WHERE id = ?',
+      [q.question_text, q.answer_key, q.marks, q.difficulty, q.image_url, q.id]
     );
-    res.json(rows);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.json(q);
+  } else {
+    // Insert new
+    const result = await db.execute(
+      'INSERT INTO questions (subject, grade, lesson_id, question_type, marks, question_text, answer_key, image_url, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [q.subject, q.grade, q.lesson_id, q.question_type, q.marks, q.question_text, q.answer_key, q.image_url, q.difficulty]
+    );
+    res.json({ ...q, id: result.insertId });
   }
 });
 
-// Startup
-const server = app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
-
-// Graceful Shutdown
-// Fix: cast process to any to resolve 'Property on does not exist on type Process' error in environments with incomplete Node.js typings
-(process as any).on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
-  });
-});
+app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
