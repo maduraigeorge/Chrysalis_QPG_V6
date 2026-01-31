@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -8,22 +7,19 @@ import { db } from './db.js';
 
 dotenv.config();
 
-const app = express();
+// Using any to bypass strict module typing issues in the build pipeline
+const app: any = (express as any)();
 const PORT = process.env.PORT || 3000;
 
-// Middleware with any casting to avoid version mismatch issues in some environments
-app.use(helmet() as any);
-app.use(cors() as any);
-app.use(morgan('combined') as any);
-app.use(express.json() as any);
+app.use((helmet as any)() as any);
+app.use((cors as any)() as any);
+app.use((morgan as any)('combined') as any);
+app.use((express as any).json() as any);
 
-// Health check endpoint
 app.get('/api/health', (req: any, res: any) => res.json({ status: 'ok' }));
 
-// Fetch lessons by subject and grade
 app.get('/api/lessons', async (req: any, res: any) => {
   try {
-    // Explicit any used to bypass environment type issues
     const { subject, grade } = req.query;
     const rows = await db.query('SELECT * FROM lessons WHERE subject = ? AND grade = ?', [subject, grade]);
     res.json(rows);
@@ -32,7 +28,6 @@ app.get('/api/lessons', async (req: any, res: any) => {
   }
 });
 
-// Fetch learning outcomes for specific lessons
 app.get('/api/learning-outcomes', async (req: any, res: any) => {
   try {
     const { lessonIds } = req.query;
@@ -46,7 +41,6 @@ app.get('/api/learning-outcomes', async (req: any, res: any) => {
   }
 });
 
-// Fetch questions based on subject, grade, and lessons
 app.get('/api/questions', async (req: any, res: any) => {
   try {
     const { subject, grade, lessonIds } = req.query;
@@ -64,7 +58,6 @@ app.get('/api/questions', async (req: any, res: any) => {
   }
 });
 
-// Create or update a question
 app.post('/api/questions', async (req: any, res: any) => {
   try {
     const q = req.body;
