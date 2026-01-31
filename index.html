@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrysalis - Professional Question Paper Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { margin: 0; padding: 0; background: white !important; }
+      .page-break { page-break-after: always; }
+      @page {
+        size: A4;
+        margin: 1.5cm;
+      }
+    }
+    .print-only { display: none; }
+    
+    /* Smooth Transitions */
+    .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    /* Custom Scrollbar for modern look */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.0.0",
+    "react/": "https://esm.sh/react@19.0.0/",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.475.0?external=react",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "express": "https://esm.sh/express@^5.2.1",
+    "mysql2/": "https://esm.sh/mysql2@^3.16.0/",
+    "cors": "https://esm.sh/cors@^2.8.5",
+    "dotenv": "https://esm.sh/dotenv@^17.2.3",
+    "docx": "https://esm.sh/docx@9.1.0",
+    "file-saver": "https://esm.sh/file-saver@2.0.5",
+    "html2pdf.js": "https://esm.sh/html2pdf.js@0.10.1",
+    "path": "https://esm.sh/path@^0.12.7",
+    "helmet": "https://esm.sh/helmet@^8.1.0",
+    "morgan": "https://esm.sh/morgan@^1.10.1"
+  }
+}
+</script>
+</head>
+<body class="text-slate-900">
+  <div id="root"></div>
+  <script type="module" src="index.tsx"></script>
+  <div style="text-align: center;">developed by maduraigeorge@gmail.com</div>
+</body>
+</html>

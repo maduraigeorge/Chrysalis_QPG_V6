@@ -1,11 +1,25 @@
-<div align="center">
+# AIStudio – Question Paper Generator
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A robust Micro-SaaS for educators to generate curriculum-aligned question papers and banks.
 
-  <h1>Built with AI Studio</h2>
+## Quick Start (Vercel + MySQL)
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+1. **Deploy to Vercel**: Push this code to your GitHub and connect to Vercel.
+2. **Environment Variables**: Add your `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, and `DB_PORT` (3306) to Vercel Settings.
+3. **Run Initialization**: 
+   - Open your app.
+   - Click the **Gear Icon** (bottom right).
+   - Login (**Admin** / **Reset@123**).
+   - Go to **System Setup** > **Initialize & Seed Database**.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Tech Stack
+- **Frontend:** React + Vite + Tailwind CSS
+- **Backend:** Node.js (Vercel Serverless Functions)
+- **Database:** MySQL (Hosted on FreeSQLDatabase or similar)
 
-</div>
+## Features
+- **Curriculum Selection:** Filter by Subject, Grade, Lessons, and Learning Outcomes.
+- **Grouped Question Listing:** Questions grouped by Type and Marks.
+- **Question Bank Mode:** Create simple lists of selected questions with JSON/Print export.
+- **Question Paper Mode:** Define exam metadata and create sections with strict marks-based constraints.
+- **A4 Print Layout:** High-contrast, print-ready output for physical exams.
