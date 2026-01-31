@@ -11,57 +11,78 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware with any casting to avoid version mismatch issues in some environments
 app.use(helmet() as any);
 app.use(cors() as any);
 app.use(morgan('combined') as any);
 app.use(express.json() as any);
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+// Health check endpoint
+app.get('/api/health', (req: any, res: any) => res.json({ status: 'ok' }));
 
-app.get('/api/lessons', async (req, res) => {
-  const { subject, grade } = req.query;
-  const rows = await db.query('SELECT * FROM lessons WHERE subject = ? AND grade = ?', [subject, grade]);
-  res.json(rows);
-});
-
-app.get('/api/learning-outcomes', async (req, res) => {
-  const { lessonIds } = req.query;
-  if (!lessonIds) return res.json([]);
-  const ids = (lessonIds as string).split(',');
-  const placeholders = ids.map(() => '?').join(',');
-  const rows = await db.query(`SELECT * FROM learning_outcomes WHERE lesson_id IN (${placeholders})`, ids);
-  res.json(rows);
-});
-
-app.get('/api/questions', async (req, res) => {
-  const { subject, grade, lessonIds } = req.query;
-  let sql = 'SELECT * FROM questions WHERE subject = ? AND grade = ?';
-  const params: any[] = [subject, grade];
-  if (lessonIds) {
-    const ids = (lessonIds as string).split(',');
-    sql += ` AND lesson_id IN (${ids.map(() => '?').join(',')})`;
-    params.push(...ids);
+// Fetch lessons by subject and grade
+app.get('/api/lessons', async (req: any, res: any) => {
+  try {
+    // Explicit any used to bypass environment type issues
+    const { subject, grade } = req.query;
+    const rows = await db.query('SELECT * FROM lessons WHERE subject = ? AND grade = ?', [subject, grade]);
+    res.json(rows);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
-  const rows = await db.query(sql, params);
-  res.json(rows);
 });
 
-app.post('/api/questions', async (req, res) => {
-  const q = req.body;
-  if (q.id) {
-    // Update existing
-    await db.execute(
-      'UPDATE questions SET question_text = ?, answer_key = ?, marks = ?, difficulty = ?, image_url = ? WHERE id = ?',
-      [q.question_text, q.answer_key, q.marks, q.difficulty, q.image_url, q.id]
-    );
-    res.json(q);
-  } else {
-    // Insert new
-    const result = await db.execute(
-      'INSERT INTO questions (subject, grade, lesson_id, question_type, marks, question_text, answer_key, image_url, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [q.subject, q.grade, q.lesson_id, q.question_type, q.marks, q.question_text, q.answer_key, q.image_url, q.difficulty]
-    );
-    res.json({ ...q, id: result.insertId });
+// Fetch learning outcomes for specific lessons
+app.get('/api/learning-outcomes', async (req: any, res: any) => {
+  try {
+    const { lessonIds } = req.query;
+    if (!lessonIds) return res.json([]);
+    const ids = (lessonIds as string).split(',');
+    const placeholders = ids.map(() => '?').join(',');
+    const rows = await db.query(`SELECT * FROM learning_outcomes WHERE lesson_id IN (${placeholders})`, ids);
+    res.json(rows);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Fetch questions based on subject, grade, and lessons
+app.get('/api/questions', async (req: any, res: any) => {
+  try {
+    const { subject, grade, lessonIds } = req.query;
+    let sql = 'SELECT * FROM questions WHERE subject = ? AND grade = ?';
+    const params: any[] = [subject || '', grade || ''];
+    if (lessonIds) {
+      const ids = (lessonIds as string).split(',');
+      sql += ` AND lesson_id IN (${ids.map(() => '?').join(',')})`;
+      params.push(...ids);
+    }
+    const rows = await db.query(sql, params);
+    res.json(rows);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create or update a question
+app.post('/api/questions', async (req: any, res: any) => {
+  try {
+    const q = req.body;
+    if (q.id) {
+      await db.execute(
+        'UPDATE questions SET question_text = ?, answer_key = ?, marks = ?, difficulty = ?, image_url = ? WHERE id = ?',
+        [q.question_text, q.answer_key, q.marks, q.difficulty, q.image_url, q.id]
+      );
+      res.json(q);
+    } else {
+      const result = (await db.execute(
+        'INSERT INTO questions (subject, grade, lesson_id, question_type, marks, question_text, answer_key, image_url, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [q.subject, q.grade, q.lesson_id, q.question_type, q.marks, q.question_text, q.answer_key, q.image_url, q.difficulty]
+      )) as any;
+      res.json({ ...q, id: result.insertId });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 });
 

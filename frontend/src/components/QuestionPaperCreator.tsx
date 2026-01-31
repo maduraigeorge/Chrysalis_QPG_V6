@@ -31,16 +31,12 @@ const QuestionPaperCreator: React.FC<Props> = ({ questions, metadata, onMetadata
     if (!editingQuestion?.question_text) return;
     setIsSaving(true);
     try {
-      // 1. Save to Storage (Local or API)
       const savedQ = await apiService.createQuestion(editingQuestion);
       
-      // 2. Critical: Update global session state in App.tsx
-      // This ensures that the 'questions' prop being passed into this component is fresh.
       if (onUpdateQuestion) {
         onUpdateQuestion(savedQ);
       }
       
-      // 3. If it was a NEW question being created from within a section, auto-select it
       if (activeSectionId && !editingQuestion.id) {
         const section = sections.find(s => s.id === activeSectionId);
         if (section) {
@@ -71,7 +67,6 @@ const QuestionPaperCreator: React.FC<Props> = ({ questions, metadata, onMetadata
   const handleAutogradeSubmit = () => {
     if (!isAligned) return;
     
-    // Use current questions array which includes recent edits
     const globalSelectedIds = sections.flatMap(s => s.selectedQuestionIds);
     const selectedQuestions = questions.filter(q => globalSelectedIds.includes(q.id));
     
@@ -194,7 +189,7 @@ const QuestionPaperCreator: React.FC<Props> = ({ questions, metadata, onMetadata
                            return (
                              <div key={q.id} className={`group flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${isSelected ? 'bg-indigo-50 border-indigo-600' : 'bg-white border-slate-200'}`}>
                                 <input type="checkbox" checked={isSelected} onChange={() => {
-                                   const newIds = isSelected ? section.selectedQuestionIds.filter(id => id !== q.id) : [...section.selectedQuestionIds, q.id];
+                                   const newIds = isSelected ? section.selectedQuestionIds.filter((id: number) => id !== q.id) : [...section.selectedQuestionIds, q.id];
                                    if (!isSelected && section.selectedQuestionIds.length >= needed) return;
                                    onSectionsChange(sections.map(s => s.id === section.id ? { ...s, selectedQuestionIds: newIds } : s));
                                 }} className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
