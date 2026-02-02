@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { 
   Image as ImageIcon, 
@@ -27,9 +28,9 @@ import {
   ArrowLeft,
   PlusSquare
 } from 'lucide-react';
-import { Question, PaperMetadata } from '../types';
-import { exportBankToWord } from '../utils/DocxExporter';
-import { exportBankToRtf } from '../utils/RtfExporter';
+import { Question, PaperMetadata } from '../types.ts';
+import { exportBankToWord } from '../utils/DocxExporter.ts';
+import { exportBankToRtf } from '../utils/RtfExporter.ts';
 import saveAs from 'file-saver';
 
 interface Props {

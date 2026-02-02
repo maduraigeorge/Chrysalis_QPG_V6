@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { AppMode, Question, PaperMetadata, Section } from '../types';
+import { AppMode, Question, PaperMetadata, Section } from '../types.ts';
 
 interface Props {
   mode: AppMode;

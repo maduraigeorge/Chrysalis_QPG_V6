@@ -1,40 +1,36 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+
+console.log("📦 [Module] App.tsx: Module loading");
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Settings,
   X,
   Lock,
   ArrowLeft,
-  Smartphone,
   Database,
   FileText,
   Sparkles,
-  ChevronRight,
-  User,
-  Printer,
   ChevronDown,
   Download,
   LayoutDashboard,
   ShieldCheck,
   LogOut,
-  Palette,
   UserCheck,
   ShieldAlert,
-  Filter,
-  Menu,
-  AlertCircle,
+  Printer,
   FileWarning,
   Loader2
 } from 'lucide-react';
-import { AppMode, Question, PaperMetadata, Section, UserRole } from './types';
-import SelectionPanel from './components/SelectionPanel';
-import QuestionListing from './components/QuestionListing';
-import QuestionPaperCreator from './components/QuestionPaperCreator';
-import PaperPreview from './components/PaperPreview';
-import AdminPanel from './components/AdminPanel';
-import { apiService } from './apiService';
-import { exportPaperToPdf } from './utils/PdfExporter';
+import { AppMode, Question, PaperMetadata, Section, UserRole } from './types.ts';
+import SelectionPanel from './components/SelectionPanel.tsx';
+import QuestionListing from './components/QuestionListing.tsx';
+import QuestionPaperCreator from './components/QuestionPaperCreator.tsx';
+import PaperPreview from './components/PaperPreview.tsx';
+import AdminPanel from './components/AdminPanel.tsx';
+import { apiService } from './apiService.ts';
+import { exportPaperToPdf } from './utils/PdfExporter.ts';
 
 const App: React.FC = () => {
+  console.log("⚛️ [Render] App: Component initializing");
   const [mode, setMode] = useState<AppMode>(AppMode.SELECTION);
   const [role, setRole] = useState<UserRole>(UserRole.TEACHER);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -43,7 +39,6 @@ const App: React.FC = () => {
   const [dbInitializing, setDbInitializing] = useState(true);
   const [selectedQuestionIds, setSelectedQuestionIds] = useState<number[]>([]);
   
-  // Persistent selection state
   const [selectionFilters, setSelectionFilters] = useState<{ 
     subject: string; 
     grade: string; 
@@ -76,10 +71,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
+      console.log("📡 [Network] App: Requesting DB init from apiService");
       try {
         await apiService.initDatabase();
+        console.log("✨ [Network] App: DB init successful");
       } catch (e) {
-        console.error("DB Initialization failed", e);
+        console.error("❌ [Network] App: DB Initialization failed", e);
       } finally {
         setDbInitializing(false);
       }
@@ -94,9 +91,8 @@ const App: React.FC = () => {
     try {
       const data = await apiService.getQuestions(filters);
       setQuestions(data);
-      setSelectedQuestionIds([]); // By default, all questions are unselected
+      setSelectedQuestionIds([]); 
       setPaperMetadata(prev => ({ ...prev, subject: filters.subject, grade: filters.grade }));
-      
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } catch (error) {
       console.error("Failed to fetch questions", error);
@@ -182,7 +178,6 @@ const App: React.FC = () => {
     setQuestions(prev => {
       const exists = prev.find(q => q.id === updatedQ.id);
       if (exists) {
-        // Deep update to trigger reactivity in all connected components
         return prev.map(q => q.id === updatedQ.id ? { ...updatedQ } : q);
       }
       return [...prev, { ...updatedQ }];
@@ -293,86 +288,51 @@ const App: React.FC = () => {
 
       <main className="flex-1 max-w-[1600px] mx-auto w-full px-4 md:px-8 py-4 md:py-8 no-print pb-32">
         {mode === AppMode.ADMIN ? (
-          <div className="w-full"><AdminPanel /></div>
+          <AdminPanel />
         ) : mode === AppMode.PREVIEW ? (
-          <div className="max-w-[1100px] mx-auto w-full space-y-8 animate-in fade-in duration-500">
+          <div className="max-w-[1100px] mx-auto w-full space-y-8">
              <div className="flex items-center justify-between px-1">
-                <button 
-                  onClick={() => setMode(AppMode.PAPER)}
-                  className="bg-white text-slate-900 border-2 border-slate-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 shadow-xl active:scale-95 hover:bg-slate-50 transition-all"
-                >
+                <button onClick={() => setMode(AppMode.PAPER)} className="bg-white text-slate-900 border-2 border-slate-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 shadow-xl active:scale-95">
                    <ArrowLeft size={16} strokeWidth={3} /> Return to Designer
                 </button>
-                
-                <div className="flex items-center gap-4">
-                  {!isPaperAligned && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-2 border-amber-200 rounded-xl text-amber-800 text-[9px] font-black uppercase tracking-widest shadow-sm">
-                      <FileWarning size={14} className="text-amber-600" /> Draft: Criteria Incomplete
-                    </div>
-                  )}
+                <div className="flex items-center gap-3">
                   {isPaperAligned ? (
-                    <div className="flex items-center gap-3">
-                       <button 
-                        onClick={handleDownloadPdf}
-                        disabled={isExporting}
-                        className="bg-rose-600 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 shadow-xl active:scale-95 border-2 border-rose-400 hover:brightness-110 transition-all disabled:opacity-50"
-                      >
-                         {isExporting ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} strokeWidth={3} />} 
-                         Download Final PDF
-                      </button>
-                      <button 
-                        onClick={() => window.print()}
-                        className="bg-indigo-700 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 shadow-xl active:scale-95 border-2 border-indigo-400 hover:brightness-110 transition-all"
-                      >
-                         <Printer size={16} strokeWidth={3} /> Print
-                      </button>
-                    </div>
+                    <button onClick={handleDownloadPdf} disabled={isExporting} className="bg-rose-600 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 shadow-xl disabled:opacity-50">
+                       {isExporting ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} strokeWidth={3} />} Download Final PDF
+                    </button>
                   ) : (
-                    <div className="flex items-center gap-2 px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-slate-400 text-[9px] font-black uppercase tracking-widest cursor-not-allowed">
-                       <Lock size={14} /> Download Restricted
+                    <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-amber-800 text-[9px] font-black uppercase tracking-widest">
+                      <FileWarning size={14} /> Criteria Incomplete
                     </div>
                   )}
                 </div>
              </div>
-             <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border-2 border-slate-200">
-                <PaperPreview mode={mode} metadata={paperMetadata} sections={sections} questions={questions} selectedBankQuestionIds={selectedQuestionIds} />
-             </div>
+             <PaperPreview mode={mode} metadata={paperMetadata} sections={sections} questions={questions} selectedBankQuestionIds={selectedQuestionIds} />
           </div>
         ) : mode === AppMode.SELECTION ? (
-           <div className="max-w-[1100px] mx-auto w-full animate-in fade-in duration-500">
-              <SelectionPanel 
-                initialFilters={selectionFilters}
-                onScopeChange={handleScopeChange}
-              />
-            </div>
+           <SelectionPanel initialFilters={selectionFilters} onScopeChange={handleScopeChange} />
         ) : mode === AppMode.BANK ? (
-          <div className="max-w-[1100px] mx-auto w-full animate-in fade-in duration-500">
-            <QuestionListing 
-              questions={questions} 
-              loading={loading}
-              selectedIds={selectedQuestionIds}
-              onToggle={toggleQuestionSelection}
-              onToggleAll={setBulkQuestionSelection}
-              metadata={paperMetadata}
-              onDesignPaper={() => setMode(AppMode.PAPER)}
-              onReturnToSelection={handleReturnToSelection}
-            />
-          </div>
+          <QuestionListing 
+            questions={questions} 
+            loading={loading}
+            selectedIds={selectedQuestionIds}
+            onToggle={toggleQuestionSelection}
+            onToggleAll={setBulkQuestionSelection}
+            metadata={paperMetadata}
+            onDesignPaper={() => setMode(AppMode.PAPER)}
+            onReturnToSelection={handleReturnToSelection}
+          />
         ) : (
-          <section className="flex-1 max-w-[1100px] mx-auto w-full">
-            <div className="space-y-6 md:space-y-8">
-              <QuestionPaperCreator 
-                questions={questions}
-                metadata={paperMetadata}
-                onMetadataChange={setPaperMetadata}
-                sections={sections}
-                onSectionsChange={setSections}
-                onUpdateQuestion={handleUpdateQuestionInMemory}
-                onReturn={handleReturnToBank}
-                onPreviewDraft={() => setMode(AppMode.PREVIEW)}
-              />
-            </div>
-          </section>
+          <QuestionPaperCreator 
+            questions={questions}
+            metadata={paperMetadata}
+            onMetadataChange={setPaperMetadata}
+            sections={sections}
+            onSectionsChange={setSections}
+            onUpdateQuestion={handleUpdateQuestionInMemory}
+            onReturn={handleReturnToBank}
+            onPreviewDraft={() => setMode(AppMode.PREVIEW)}
+          />
         )}
       </main>
 
@@ -380,26 +340,17 @@ const App: React.FC = () => {
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300 border-4 border-slate-400">
             <div className="bg-slate-900 p-6 md:p-10 text-white text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6 mx-auto shadow-lg">
-                <Lock size={32} className="w-8 h-8 md:w-10 md:h-10 text-white" strokeWidth={2.5} />
-              </div>
+              <Lock size={32} className="mx-auto mb-4" strokeWidth={2.5} />
               <h2 className="text-xl md:text-2xl font-black tracking-tight">Admin Portal</h2>
-              <p className="text-slate-400 mt-2 font-bold uppercase tracking-widest text-[9px]">Restricted Access Area</p>
             </div>
             <form onSubmit={handleAdminLogin} className="p-6 md:p-10 space-y-6">
-              {loginError && <div className="bg-rose-50 text-rose-600 p-4 rounded-xl text-[10px] font-black border-2 border-rose-200 uppercase tracking-widest text-center">{loginError}</div>}
+              {loginError && <div className="text-rose-600 text-[10px] font-black uppercase text-center">{loginError}</div>}
               <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Username</label>
-                  <input type="text" autoFocus required value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 font-bold text-slate-800 focus:border-indigo-500 shadow-inner" placeholder="Enter Admin" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Password</label>
-                  <input type="password" required value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 font-bold text-slate-800 focus:border-indigo-500 shadow-inner" placeholder="Enter Reset@123" />
-                </div>
+                <input type="text" autoFocus required value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 font-bold" placeholder="Username" />
+                <input type="password" required value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 font-bold" placeholder="Password" />
               </div>
-              <button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-slate-800 transition-all">Authorize Access</button>
-              <button type="button" onClick={() => setShowAdminLogin(false)} className="w-full text-slate-400 font-black text-[10px] uppercase tracking-widest py-2">Cancel</button>
+              <button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl">Authorize</button>
+              <button type="button" onClick={() => setShowAdminLogin(false)} className="w-full text-slate-400 font-black text-[10px] uppercase py-2">Cancel</button>
             </form>
           </div>
         </div>

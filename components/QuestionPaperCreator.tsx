@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Plus, 
@@ -31,11 +32,11 @@ import {
   LayoutDashboard,
   Star
 } from 'lucide-react';
-import { Question, PaperMetadata, Section } from '../types';
-import { apiService } from '../apiService';
-import { exportPaperToWord } from '../utils/DocxExporter';
-import { exportPaperToRtf } from '../utils/RtfExporter';
-import { exportPaperToPdf } from '../utils/PdfExporter';
+import { Question, PaperMetadata, Section } from '../types.ts';
+import { apiService } from '../apiService.ts';
+import { exportPaperToWord } from '../utils/DocxExporter.ts';
+import { exportPaperToRtf } from '../utils/RtfExporter.ts';
+import { exportPaperToPdf } from '../utils/PdfExporter.ts';
 import saveAs from 'file-saver';
 
 interface Props {
@@ -426,7 +427,7 @@ const QuestionPaperCreator: React.FC<Props> = ({ questions, metadata, onMetadata
                     </div>
                   </div>
                   <div className="flex items-center gap-2 md:gap-4">
-                     {!isFull && <div className="hidden xs:flex items-center gap-1 md:gap-1.5 bg-amber-50 text-amber-900 px-2 md:px-3 py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest border-2 border-amber-300 shadow-sm"><AlertCircle className="w-3 h-3 md:w-3.5 md:h-3.5" /> {needed - section.selectedQuestionIds.length} Missing</div>}
+                     {!isFull && <div className="hidden xs:flex items-center gap-1 md:gap-1.5 bg-amber-50 text-amber-900 px-2 md:px-3 py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest"><AlertCircle className="w-3 h-3 md:w-3.5 md:h-3.5" /> {needed - section.selectedQuestionIds.length} Missing</div>}
                      <button onClick={e => { e.stopPropagation(); removeSection(section.id); }} className="text-slate-500 hover:text-rose-700 transition-colors p-1.5 md:p-2 hover:bg-rose-50 rounded-xl">
                        <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                      </button>

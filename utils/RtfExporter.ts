@@ -1,6 +1,6 @@
 
 import saveAs from 'file-saver';
-import { Question, PaperMetadata, Section } from '../types';
+import { Question, PaperMetadata, Section } from '../types.ts';
 
 // Helper to clean item tags from question text
 const cleanText = (text: string) => {
@@ -60,7 +60,6 @@ export const exportBankToRtf = (questions: Question[], metadata: PaperMetadata) 
 
 /**
  * Exports a structured question paper to an RTF file.
- * Implementation fixed to resolve missing export error in QuestionPaperCreator.
  */
 export const exportPaperToRtf = (metadata: PaperMetadata, sections: Section[], questions: Question[]) => {
   let content = rtfHeader;

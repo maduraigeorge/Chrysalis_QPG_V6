@@ -7,70 +7,83 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-    }
-    @media print {
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-      body { margin: 0; padding: 0; background: white !important; }
-      .page-break { page-break-after: always; }
-      @page {
-        size: A4;
-        margin: 1.5cm;
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          animation: { 'bounce-slow': 'bounce 3s infinite' }
+        }
       }
     }
-    .print-only { display: none; }
-    
-    /* Smooth Transitions */
-    .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    
-    /* Custom Scrollbar for modern look */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-  </style>
+  </script>
+
   <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
     "react/": "https://esm.sh/react@19.0.0/",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
     "lucide-react": "https://esm.sh/lucide-react@0.475.0?external=react",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "express": "https://esm.sh/express@^5.2.1",
-    "mysql2/": "https://esm.sh/mysql2@^3.16.0/",
-    "cors": "https://esm.sh/cors@^2.8.5",
-    "dotenv": "https://esm.sh/dotenv@^17.2.3",
     "docx": "https://esm.sh/docx@9.1.0",
     "file-saver": "https://esm.sh/file-saver@2.0.5",
     "html2pdf.js": "https://esm.sh/html2pdf.js@0.10.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "express": "https://esm.sh/express@^5.2.1",
+    "mysql2/": "https://esm.sh/mysql2@^3.16.2/",
+    "cors": "https://esm.sh/cors@^2.8.6",
+    "dotenv": "https://esm.sh/dotenv@^17.2.3",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
     "path": "https://esm.sh/path@^0.12.7",
     "helmet": "https://esm.sh/helmet@^8.1.0",
     "morgan": "https://esm.sh/morgan@^1.10.1"
   }
 }
 </script>
+<link rel="stylesheet" href="index.css">
 </head>
-<body class="text-slate-900">
-  <div id="root"></div>
+<body class="bg-slate-50 font-sans">
+  <div id="root">
+    <!-- Initial Loading State -->
+    <div id="loading-screen" style="height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; color: #64748b; background: #f8fafc;">
+      <div style="text-align: center; max-width: 400px; padding: 20px;">
+        <div style="width: 48px; height: 48px; border: 4px solid #e2e8f0; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);"></div>
+        <h2 style="font-weight: 800; font-size: 18px; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.025em;">Initializing Workspace</h2>
+        <p id="loading-text" style="font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8;">Resolving Production Modules...</p>
+        
+        <div id="rescue-ui" style="display: none; margin-top: 30px; padding: 20px; border: 2px solid #fee2e2; border-radius: 16px; background: white; text-align: left; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
+           <p style="font-size: 12px; font-weight: 800; color: #b91c1c; margin-bottom: 10px;">⚠️ BOOT FAILURE DETECTED</p>
+           <p style="font-size: 11px; color: #475569; margin-bottom: 15px; line-height: 1.5;">The browser is failing to resolve application modules. This is usually caused by network filters or incompatible browser versions.</p>
+           <button onclick="window.location.reload()" style="width: 100%; padding: 10px; background: #1e293b; color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 10px; cursor: pointer; text-transform: uppercase;">Restart Core Engine</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <script type="module">
+    // Rescue Timer
+    setTimeout(() => {
+      if (!window.APP_STARTED) {
+        const text = document.getElementById('loading-text');
+        if (text) text.innerText = "Module Resolution Timeout";
+        const rescue = document.getElementById('rescue-ui');
+        if (rescue) rescue.style.display = 'block';
+      }
+    }, 5000);
+  </script>
+
   <script type="module" src="index.tsx"></script>
-  <div style="text-align: center;">developed by maduraigeorge@gmail.com</div>
+
+  <footer style="text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; background: transparent;">
+    developed by maduraigeorge@gmail.com
+  </footer>
 </body>
 </html>

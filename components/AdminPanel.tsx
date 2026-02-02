@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
@@ -21,9 +22,9 @@ import {
   Key,
   Star
 } from 'lucide-react';
-import { apiService } from '../apiService';
-import { Lesson, LearningOutcome, Question } from '../types';
-import { SUBJECTS, GRADES, QUESTION_TYPES } from '../constants';
+import { apiService } from '../apiService.ts';
+import { Lesson, LearningOutcome, Question } from '../types.ts';
+import { SUBJECTS, GRADES, QUESTION_TYPES } from '../constants.ts';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'questions' | 'curriculum' | 'system'>('questions');
